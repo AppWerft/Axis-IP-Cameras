@@ -1,60 +1,81 @@
-exports.get = function(_callback) {
+exports.create = function() {
 	Ti.include('cameras.js');
 	var rightButton = Ti.UI.createButton({
 		systemButton : Ti.UI.iPhone.SystemButton.ADD
 	});
 	var self = Titanium.UI.createWindow({
-		title : 'List of cameras',
+		title : 'List of AXIS-cameras',
 		navBarHidden : false,
-		barColor : 'gray',
+		barColor : 'black',
 		rightNavButton : rightButton
 	});
-	
+
 	self.container = Ti.UI.createScrollableView({
 		showPagingControl : true,
 		zIndex : 0
 	});
-	self.add(self.container);
-	setTimeout(function() {
-		self.tv = Ti.UI.createTableView({
-			backgroundImage : '/assets/bg.png',
-			height : Ti.UI.FILL,
-		});
-		var pins = [];
-		for (var i = 0; i < cameras.length; i++) {
-			self.tv.appendRow(require('camerarow').get(cameras[i]));
-		}
-		_callback();
-		self.mapview = Ti.Map.createView({
-			mapType : Ti.Map.HYBRID_TYPE,
-			region : {
-				latitude : 0,
-				longitude : 0,
-				latitudeDelta : 4,
-				longitudeDelta : 4,
+	//self.add(self.container);
+
+	var data = [];
+	for (var i = 0; i < cameras.length; i++) {
+		var camera = cameras[i];
+		camera.host = camera.url.split(':')[0];camera.port = camera.url.split(':')[1] || 80;
+		camera.lat = camera.latlon.split(',')[0];
+		camera.lon = camera.latlon.split(',')[1];
+		data.push({
+			image : {
+				image : 'http://' + camera.host + ':' + camera.port + '/axis-cgi/jpg/image.cgi'
+			},
+			title : {
+				text : camera.title
+			},
+			subtitle : {
+				text : camera.subtitle
+			},
+			properties : {
+				itemId : JSON.stringify(camera),
+				accessoryType : Ti.UI.LIST_ACCESSORY_TYPE_DISCLOSURE
 			}
 		});
-
-		self.tv.addEventListener('click', function(_e) {
-
-			var admin = require('camerafullview').create(_e.rowData.camera, false);
-			self.tab.open(admin);
-		});
-
-		var pins = [];
-		for (var i = 0; i < cameras.length; i++) {
-			pins[i] = Titanium.Map.createAnnotation({
-				latitude : cameras[i].lat,
-				longitude : cameras[i].lon,
-				title : cameras[i].title,
-				image : '/assets/camera.png',
-
-			});
-			self.mapview.addAnnotations(pins);
-
+	}
+	var cameralistTemplate = require('TEMPLATES').cameraitem;
+	var section = Ti.UI.createListSection({
+		items : data,
+	});
+	self.cameralistview = Ti.UI.createListView({
+		sections : [section],
+		templates : {
+			'cameras' : cameralistTemplate
+		},
+		defaultItemTemplate : 'cameras',
+	});
+	self.mapview = Ti.Map.createView({
+		mapType : Ti.Map.HYBRID_TYPE,
+		region : {
+			latitude : 0,
+			longitude : 0,
+			latitudeDelta : 4,
+			longitudeDelta : 4,
 		}
-		self.container.views = [self.tv, self.mapview];
+	});
+	var pins = [];
+	for (var i = 0; i < cameras.length; i++) {
+		pins[i] = Ti.Map.createAnnotation({
+			latitude : cameras[i].lat,
+			longitude : cameras[i].lon,
+			title : cameras[i].title,
+			image : '/assets/camera.png',
+		});
+		self.mapview.addAnnotations(pins);
+	}
+	self.container.views = [self.cameralistview, self.mapview];
 
-	}, 100);
+	self.add(self.container);
+	self.cameralistview.addEventListener('itemclick', function(_e) {
+		console.log(_e.itemId);
+		self.tab.open(require('cameraadmin').create(JSON.parse(_e.itemId)), {
+			animate : true
+		});
+	});
 	return self;
 }

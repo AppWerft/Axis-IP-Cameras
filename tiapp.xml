@@ -14,10 +14,10 @@
         <target device="android">false</target>
         <target device="blackberry">false</target>
     </deployment-targets>
-    <sdk-version>3.1.0.GA</sdk-version>
+    <sdk-version>3.2.0.v20130510175642</sdk-version>
     <id>de.appwerft.axis</id>
     <name>Axis</name>
-    <version>1.0</version>
+    <version>1.1</version>
     <publisher>rainerschleevoigt</publisher>
     <url>http://</url>
     <description>not specified</description>

@@ -1,12 +1,11 @@
 exports.create = function(_camera) {
-	
 	var self = Titanium.UI.createWindow({
 		title : 'Configuration',
 		backgroundImage : '/assets/bg.png',
-		
 		navBarHidden : false,
-		barColor : 'gray'
+		barColor : 'black'
 	});
+	console.log(_camera);
 	setTimeout(function() {
 		if (!_camera.latlon) {
 			require('geo.ip').get(_camera.host, function(_e) {
@@ -22,7 +21,7 @@ exports.create = function(_camera) {
 		});
 
 		container.add(require('legende').get('Title of location:'));
-		var title = Titanium.UI.createTextField({
+		var title = Ti.UI.createTextField({
 			color : '#336699',
 			height : 20,
 			value : _camera.title,
@@ -68,7 +67,7 @@ exports.create = function(_camera) {
 		url.add(port);
 		container.add(url);
 		container.add(require('legende').get('Login:'));
-		var login = Titanium.UI.createTextField({
+		var login = Ti.UI.createTextField({
 			color : '#336699',
 			height : 20,
 			value : _camera.login,
@@ -145,12 +144,7 @@ exports.create = function(_camera) {
 
 			}
 		});
-		var mapviewlayer = Ti.UI.createView({
-			left : '50%',
-			bottom : 0,
-			width : '50%',
-			height : 110
-		});
+		
 		var camerapin = Titanium.Map.createAnnotation({
 			latitude : _camera.lat,
 			longitude : _camera.lon,
@@ -160,8 +154,8 @@ exports.create = function(_camera) {
 			animate : true,
 		});
 		mapview.addAnnotation(camerapin);
-		mapviewlayer.addEventListener('click', function(_e) {
-			win.tab.open(require('mapfullview').create(_camera));
+		mapview.addEventListener('longpress', function(_e) {
+			self.tab.open(require('mapfullview').create(_camera));
 		});
 		var webview = Ti.UI.createWebView({
 			bottom : 5,
@@ -170,12 +164,11 @@ exports.create = function(_camera) {
 			height : 100,
 			disableBounce : true,
 			borderRadius : 7,
-			html : '<html><body style="padding:0px;margin:0px;"><img width="180" height="110" alt="" src="' + _camera.protocol + '://' + _camera.host + ':' + _camera.port + '/axis-cgi/mjpg/video.cgi"></body></html>'
+			html : '<html><body style="padding:0px;margin:0px;"><img width="180" height="110" alt="" src="http://' + _camera.host + ':' + _camera.port + '/axis-cgi/mjpg/video.cgi"></body></html>'
 		});
 		webview.addEventListener('click', function() {
-			Ti.API.log(_camera);
 			var camerafullview = require('camerafullview').create(_camera,true);
-			win.tab.open(camerafullview);
+			self.tab.open(camerafullview);
 		});
 		var slider1 = Titanium.UI.createSlider({
 			bottom : 2,
@@ -190,7 +183,6 @@ exports.create = function(_camera) {
 		});
 		self.add(container);
 		self.add(mapview);
-		self.add(mapviewlayer);
 
 		self.add(webview);
 		self.add(slider1);
