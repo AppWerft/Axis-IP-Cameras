@@ -86,10 +86,12 @@ exports.create = function(_camera) {
 	self.mapview.addAnnotation(self.mapview.camerapin);
 	self.mapview.addEventListener('pinchangedragstate', function(_e) {
 		self.mapview.camerapin.subtitle = '';
-		require('geo.reverseresolve').get(_e.annotation.getLatitude() + ',' + _e.annotation.getLongitude(), function(_e) {
-			self.Street.value = _e.res.street + ' ' + _e.res.number;
-			self.City.value = _e.res.city;
-			self.Country.value = _e.res.country;
+		require('geo.reverseresolve').get(_e.annotation.getLatitude() + ',' + _e.annotation.getLongitude(), function(_res) {
+			if (_res != null) {
+				self.Street.value = _res.street + ' ' + _res.number;
+				self.City.value = _e.city;
+				self.Country.value = _e.country;
+			}
 		});
 	});
 	self.container.animate(Ti.UI.createAnimation({
@@ -98,11 +100,14 @@ exports.create = function(_camera) {
 	}));
 	self.add(self.mapview);
 
-	require('geo.reverseresolve').get(_camera.lat + ',' + _camera.lon, function(_e) {
-		self["Street"].value = _e.res.street + ' ' + _e.res.number;
-		self["City"].value = _e.res.city;
-		self["Country"].value = _e.res.country;
+	require('geo.reverseresolve').get(_camera.lat + ',' + _camera.lon, function(_res) {
+		console.log(_res);
+		if (_res != null) {
+			self["Street"].value = _res.street + ' ' + _res.number;
+			self["City"].value = _res.city;
+			self["Country"].value = _res.country;
+		}
 	});
-	
+
 	return self;
 }

@@ -33,7 +33,7 @@ exports.create = function(_camera, admin) {
 
 	if (!admin)
 		self.rightNavButton = rightButton;
-	var url = _camera.protocol + '://' + _camera.host + ':' + _camera.port + '/axis-cgi/mjpg/video.cgi';
+	var url = 'http://' + _camera.host + ':' + _camera.port + '/axis-cgi/mjpg/video.cgi';
 	var webview = Ti.UI.createWebView({
 		width : 440,
 		transform : Ti.UI.create2DMatrix().rotate(90),
